@@ -20,10 +20,20 @@
  */
 const CORE_PATH = "src/core";
 
-// Strip dot directories.
+/*
+ * --------------------------------------------------------------
+ * Load the core config files from the config/ directory into and 
+ * array and strip the dot ('.', '..') directories from the configs
+ * array on *nix systems.
+ * --------------------------------------------------------------
+ */
 $core_files = array_diff(scandir(CORE_PATH), [".",".."]);
 
-// Load each file in the config directory.
+/*
+ * --------------------------------------------------------------
+ * Load each file in the config directory.
+ * --------------------------------------------------------------
+ */
 foreach($core_files as $file) {
     require(CORE_PATH . '/' . $file);
 }
