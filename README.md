@@ -6,12 +6,10 @@ A lightweight MVC web application framework with URL routing.
 .
 ├── app
 │   ├── controllers
-│   │   ├── DefaultController.php
 │   │   └── index.php
 │   ├── models
 │   │   └── index.php
 │   └── views
-│       ├── default_view.php
 │       └── index.php
 ├── assets
 │   ├── css
