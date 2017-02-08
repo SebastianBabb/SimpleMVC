@@ -21,6 +21,7 @@
 class SimpleMVC {
     private $config;
     private $router;
+    private $controller;
 
     /**
      * The constructor creates an instance of the controller class

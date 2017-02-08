@@ -39,6 +39,6 @@ class ControllerFactory {
            throw new InvalidControllerException("Error:: No such controller {$router->controller_file}");
         }
 
-        return new $router->controller($router->action);
+        return new $router->controller();
     }
 }

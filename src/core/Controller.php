@@ -63,11 +63,10 @@ class Controller {
         if(in_array($action, $this->controller_actions)) {
             /*
              * --------------------------------------------------------------
-             * Instantiate the controller object and execute the action.
+             * Call action method of the instance.
              * --------------------------------------------------------------
              */
-            $controller = new $this->controller();
-            $controller->$action();
+            $this->$action();
         } else {
             throw new InvalidControllerActionException("Error:: No such controller action {$action}");
         }
