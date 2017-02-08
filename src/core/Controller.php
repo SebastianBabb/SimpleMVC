@@ -22,7 +22,6 @@
  */
 class Controller {
     protected $load;
-    protected $controller;
     protected $controller_actions;
 
     /**
@@ -41,7 +40,6 @@ class Controller {
          * --------------------------------------------------------------
          */
         $this->load = new Loader($this);
-        $this->controller = get_class($this);
         $this->controller_actions = get_class_methods($this);
     }
 
