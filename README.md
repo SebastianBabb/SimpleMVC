@@ -1,5 +1,6 @@
 # SimpleMVC
 A lightweight MVC web application framework with URL routing.
+\* SimpleMVC is in the middle of a complete rewrite (Woot! Simple routing and SEO friendly URLs!).  Consequently, not all funcionality has been implemented.  In its current state, SimpleMVC provides a complete MVC solution with routing, but has yet to implement its database funcitonality.  This means you will have to instantiate your own database object, sanitize your SQL, organize returned records, ect...
 
 ## Directory Structure
 ```
