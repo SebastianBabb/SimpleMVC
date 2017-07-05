@@ -21,6 +21,7 @@
  * @see https://www.simplemvc.xyz
  */
 class Controller {
+    protected $simpleMVC;
     protected $load;
     protected $controller_actions;
 
@@ -31,7 +32,7 @@ class Controller {
      *
      * @access public
      */
-    public function __construct() {
+    public function __construct($simpleMVC) {
         /*
          * --------------------------------------------------------------
          * Create a loader instance that the children will use to load
@@ -41,6 +42,7 @@ class Controller {
          */
         $this->load = new Loader($this);
         $this->controller_actions = get_class_methods($this);
+        $this->simpleMVC = $simpleMVC;
     }
 
     /**
@@ -68,5 +70,25 @@ class Controller {
         } else {
             throw new InvalidControllerActionException("Error:: No such controller action {$action}");
         }
+    }
+
+    /**
+     * Loads the view file.
+     *
+     * @param string @file_path the path of the view file to load
+     * @access public
+     */
+    public function load_view($file_path) {
+       require($file_path); 
+    }
+
+    /**
+     * Returns the contens of a view file.
+     *
+     * @param string @file_path the path of the view file to load
+     * @access public
+     */
+    public function load_view_source($file_path) {
+        return file_get_contents($file_path);
     }
 }

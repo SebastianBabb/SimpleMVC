@@ -34,10 +34,68 @@ class Loader {
      * Loads the specified view file or returns its contents as a string.
      *
      * @param string $view_file the name of the view file to load (with or without extension)
-     * @param bool $string true returns file content as a string, false loads the view file
-     * @return string the content of the view file if the string parameter is set
+     * @param array $variables referential array of variables that will be available to the view
+     *        ex. array('name'=>'SimpleMVC') will be accessible in the view as $name
      */
-    public function view($view_file, $string=false) {
+    public function view($view_file, $variables=null) {
+        /*
+         * --------------------------------------------------------------
+         * Check the file extension and ensure it is a php file.  If the
+         * extension is not php, let it throw an error.  If the view_file
+         * name was passed without an extension, append ".php" to it.
+         * --------------------------------------------------------------
+         */
+        $file_ext = pathinfo($view_file, PATHINFO_EXTENSION);
+
+        /*
+         * --------------------------------------------------------------
+         * Add the file extension.
+         * --------------------------------------------------------------
+         */
+        if(empty($file_ext)) {
+            $view_file = $view_file . ".php";
+        }
+
+        /*
+         * --------------------------------------------------------------
+         * Build the view file path.
+         * --------------------------------------------------------------
+         */
+        $view_file_path = $this->view_dir . $view_file;
+
+        /*
+         * --------------------------------------------------------------
+         * If the file exists, load the view file.
+         * If the view file is nonexistent, an InvalidViewException is
+         * thrown.
+         * --------------------------------------------------------------
+         */
+        if(file_exists($view_file_path)) {
+            /*
+             * --------------------------------------------------------------
+             * Load the view variables only if a referential array was passed
+             * otherwise, throw an error.
+             * --------------------------------------------------------------
+             */
+            if(!is_null($variables) && is_array($variables) && !is_int(array_keys($variables)[0])) {
+                $this->load_variables($variables); // Throw incorrect data format excpetion in not array of key value pairs.
+            } else {
+                throw new InvalidVariablesException("Error:: Invalid variables argument for view.");
+            }
+
+            $this->controller_instance->load_view($view_file_path); 
+        } else {
+            throw new InvalidViewException("Error:: No such View {$view_file_path}");
+        }
+    }
+
+    /**
+     * Returns the source code of view_file.
+     *
+     * @param string $view_file the name of the view file to load (with or without extension)
+     * @return string the content of the view file 
+     */
+    public function view_source($view_file) {
         /*
          * --------------------------------------------------------------
          * Check the file extension and ensure it is a php file.  If the
@@ -60,18 +118,13 @@ class Loader {
 
         /*
          * --------------------------------------------------------------
-         * If the string return value is false, load the view file.
-         * Otherwise, return the file contents as a string.
+         * If the view file exists, return the file contents as a string.
          * If the view file is nonexistent, an InvalidViewException is
          * thrown.
          * --------------------------------------------------------------
          */
         if(file_exists($view_file_path)) {
-            if(!$string) {
-                require($view_file_path); 
-            } else {
-                return file_get_contents($view_file_path);
-            }
+            return $this->controller_instance->load_view_source($view_file_path);
         } else {
             throw new InvalidViewException("Error:: No such View {$view_file_path}");
         }
@@ -131,6 +184,17 @@ class Loader {
             }
         } else {
             throw new InvalidModelException("Error:: No such Model {$model_file_path}");
+        }
+    }
+
+    /**
+     * Loads the variables that will be accessible to the view into the controller instance.
+     *
+     * @param referential array $variables dictionary of variable names to values
+     */
+    private function load_variables($variables) {
+        foreach($variables as $name=>$value) {
+            $this->controller_instance->$name = $value;
         }
     }
 }

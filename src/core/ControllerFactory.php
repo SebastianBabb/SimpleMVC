@@ -17,17 +17,22 @@
  * @license MIT
  * @see https://www.simplemvc.xyz
  */
+
 class ControllerFactory {
     /**
      * Returns an instance of the controller class specified by
      * the router instance argument.  If the controller class file
      * does not exist, an InvalidControllerException is thrown.
      * 
-     * @param Router $router an instance of the router class. 
-     * @return Controller an instance of the controller class.
+     * @param SimpleMCV $simpleMVC an instance of the SimpleMVC class which contains
+     *        Router, Config and other members. 
+     * @return Controller an instance of the controller class specified by the router.
      * @access public
      */
-    public static function create($router) {
+    public static function create($simpleMVC) {
+        // Retrieve the router object.
+        $router = $simpleMVC->get_router();
+
         /*
          * --------------------------------------------------------------
          * Ensure the controller file exists and import it.
@@ -39,6 +44,6 @@ class ControllerFactory {
            throw new InvalidControllerException("Error:: No such controller {$router->controller_file}");
         }
 
-        return new $router->controller();
+        return new $router->controller($simpleMVC);
     }
 }

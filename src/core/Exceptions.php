@@ -91,3 +91,20 @@ class InvalidModelException extends SimpleMVCException {
         parent::__construct($message, $code, $previous);
     }
 }
+
+ /**
+ * The InvalidModelException is an exception class that is called
+ * when an attempt to load a nonexistent model file occurs.
+ 
+ * @package SimpleMVC
+ * @author Sebastian Babb <sebastianbabb@gmail.com>
+ * @version 0.9.1
+ * @copyright (C) 2016 Sebastian Babb <sebastianbabb@gmail.com> 
+ * @license MIT
+ * @see https://www.simplemvc.xyz
+ */
+class InvalidVariablesException extends SimpleMVCException {
+    function __construct($message, $code = 0, Exception $previous = null) {
+        parent::__construct($message, $code, $previous);
+    }
+}

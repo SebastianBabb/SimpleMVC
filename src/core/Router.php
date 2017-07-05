@@ -98,6 +98,14 @@ class Router {
             $this->controller = $path_components[0];
 
             /*
+             * If the controller is not prepended with 'Controller', add it.  All controller files and
+             * classes MUST end with 'Controller' ex. DefaultController.php -> class DefaultController
+             */
+            if(preg_match('/Controller$/', $this->controller) == 0) {
+                $this->controller .= 'Controller'; 
+            }
+
+            /*
              * --------------------------------------------------------------
              * Store the action.  If no action is set, default to index.
              * --------------------------------------------------------------

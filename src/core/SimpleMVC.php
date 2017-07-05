@@ -45,10 +45,28 @@ class SimpleMVC {
          * --------------------------------------------------------------
          */
         try {
-            $this->controller = ControllerFactory::create($router);
+            $this->controller = ControllerFactory::create($this);
         } catch(InvalidControllerException $ex) {
             $ex->message();
         }
+    }
+    
+    /**
+     * Returns the router object.
+     *
+     * @access public
+     */
+    public function get_router() {
+        return $this->router;
+    }
+
+    /**
+     * Returns the config object. 
+     *
+     * @access public
+     */
+    public function get_config() {
+        return $this->config;
     }
 
     /**
