@@ -1,5 +1,7 @@
 <?php
 
+namespace SimpleMVC;
+
 /**
  * SimpleMVC is a class that executes requests.
  *
@@ -8,98 +10,172 @@
  * requests.
  *
  * Example usage:
- * simple_mvc = new SimpleMVC($config, $router)
+ * simple_mvc = new SimpleMVC(__DIR__)
  *
- *
- * @package SimpleMVC
- * @author Sebastian Babb <sebastianbabb@gmail.com>
- * @version 0.9.1
- * @copyright (C) 2016 Sebastian Babb <sebastianbabb@gmail.com> 
- * @license MIT
- * @see https://www.simplemvc.xyz
+ * @package   SimpleMVC
+ * @author    Sebastian Babb <sebastianbabb@gmail.com>
+ * @version   0.9.1
+ * @copyright (C) 2016 Sebastian Babb <sebastianbabb@gmail.com>
+ * @license   MIT
+ * @see https://www.simplemvc.xz
  */
-class SimpleMVC {
-    private $config;
-    private $router;
-    private $controller;
+class SimpleMVC
+{
+    /*
+     * File paths.
+     */
+    private $documentRoot;   // Document root.
+
+    /*
+     * Instances.
+     */
+    private $config;            // Configuration object.
+    private $router;            // Router object.
+    // private $controller;
 
     /**
-     * The constructor creates an instance of the controller class
-     * using using a static method from the ControllerFactory class
-     * and the router instance passed as an argument on intialization.
-     *
-     * @param  Config $config instance of config class
-     * @param  Router $router instance of router class
-     * @access public
+     * Store the path for the document root and build application and src/core paths.
      */
-    public function __construct($config, $router) {
-        $this->config = $config;
-        $this->router = $router;
+    public function __construct($docRoot)
+    {
+        $this->documentRoot = $docRoot;
+    }
 
+    /**
+     * Start application.
+     */
+    public function start()
+    {
+        // System check.  Check php version, ect...
+        $this->checkSystemConfiguration();
+
+        // Loads core framework files.
+        $this->bootstrap();
+
+        // Load framework configuration files - Seperate into framework and app level configs?
+        $this->loadConfig();
+        
+        // Routing.
+        $this->router = new Router($_SERVER, $this->config->routes);
+        $this->router->parse();
+
+        // Middleware - Execute application level middleware.
+        // $_REQUEST.
+        
         /*
-         * --------------------------------------------------------------
-         * The controller factory returns an instance of the controller
-         * class specified by the router instance.  If a nonexistent
-         * controller file is specified, an InvalidControllerExcpetion is
-         * thrown and needs to be caught.
-         * --------------------------------------------------------------
-         */
+        * --------------------------------------------------------------
+        * The controller factory returns an instance of the controller
+        * class specified by the router instance.  If a nonexistent
+        * controller file is specified, an InvalidControllerExcpetion is
+        * thrown and needs to be caught.
+        * --------------------------------------------------------------
+        */
         try {
-            $this->controller = ControllerFactory::create($this);
-        } catch(InvalidControllerException $ex) {
-            $ex->message();
+            // Get the controller instance from the factory.
+            $this->controller = ControllerFactory::create($this->router);
+            // Exceute the controller action.
+            $this->controller->executeAction($this->router->action);
+            // Call the default view.
+            $this->controller->defaultView();
+        } catch (InvalidControllerException $e) {
+            // Handle missing controller exception.
+            $e->message();
+        } catch (TypeError $e) {
+            // Handle invalid response type.
+            echo $e->getMessage();
+        } catch (Exception $e) {
+            // Catch all exception.
+            $e->message();
         }
     }
-    
+
     /**
-     * Returns the router object.
-     *
-     * @access public
+     * Check the system is configured properly.
+     * (1)  Checks minimum version of php.
      */
-    public function get_router() {
-        return $this->router;
+    private function checkSystemConfiguration()
+    {
+        // The minimum major version of PHP that must be installed
+        // TODO: Make a constant.  Move to global config variable?
+        $MIN_MAJOR_VERION = '7';
+
+        // Get the version of PHP.
+        $version = phpversion();
+
+        // Isolate the major version #.
+        $majorVersion = explode('.', $version)[0];
+
+        // Return a warning if the major version fails.
+        if ($majorVersion != $MIN_MAJOR_VERION) {
+            // TODO: Log the error.
+
+            // Return the version error page,
+            echo "<h2>Invalid PHP version.</h2>";
+            echo "<p>A minimum major version of PHP {$MIN_MAJOR_VERION}.x.x is required.</p>";
+            echo "<p>PHP {$version} Installed.</p>";
+
+            // Kill the script.
+            die();
+        }
     }
 
     /**
-     * Returns the config object. 
-     *
-     * @access public
+     * Bootstrap application.  Load core files and configs.
      */
-    public function get_config() {
-        return $this->config;
+    private function bootstrap()
+    {
+        // Load core files.
+        $this->loadCore();
     }
 
     /**
-     * Returns reference to the current instance of itself.
-     *
-     * @access public
+     * Load core files.
      */
-    public function instance() {
-        return $this;
-    }
+    private function loadCore()
+    {
+        define('CORE_PATH', "src/core");
 
-    /**
-     * Executes the specified action (method) in the controller.
-     * The controller class instaniated in the constructor must 
-     * have this action (method) implemented, otherwise an
-     * InvalidControllerActionException will be thrown and must be
-     * caught.
-     *
-     * @access public
-     */
-    public function start() {
         /*
          * --------------------------------------------------------------
-         * Ensure the controller has been loaded and execute the function
-         * specified in the router instance.
+         * Load the core config files from the config/ directory into and
+         * array and strip the dot ('.', '..') directories from the configs
+         * array on *nix systems.
          * --------------------------------------------------------------
          */
-        if(isset($this->controller)) {
-            try {
-                $this->controller->execute_action($this->router->action);
-            } catch(InvalidControllerActionException $ex) {
-                $ex->message();
+        $core_files = array_diff(scandir(CORE_PATH), [".", ".."]);
+
+
+        /*
+         * --------------------------------------------------------------
+         * Load each file in the config directory.
+         * --------------------------------------------------------------
+         */
+        foreach ($core_files as $file) {
+            if ($file != 'SimpleMVC.php') {
+                require_once CORE_PATH . '/' . $file;
             }
         }
+    }
+
+    /**
+     * Load config files.
+     */
+    private function loadConfig()
+    {
+        $this->config = new Config();
+        $this->config->load();
+    }
+
+    /**
+     * Returns the path of the application code.
+     */
+    public function appPath()
+    {
+        $pathComponents = array(
+            $this->documentRoot,
+            APP_DIR,
+        );
+
+        return implode($pathComponents, '/');
     }
 }

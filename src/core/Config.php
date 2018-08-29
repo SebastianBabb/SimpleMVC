@@ -1,5 +1,7 @@
 <?php
 
+namespace SimpleMVC;
+
 /**
  * Config is a class for loading config files.
  *
@@ -14,10 +16,10 @@
  * @see https://www.simplemvc.xyz
  */
 class Config {
-    const CORE_CONFIG = "configs/core";
-    const CONFIG_DIR = "configs";
+    const CORE_CONFIG = "./configs/core";
+    const CONFIG_DIR = "./configs";
 
-    private $routes;
+    private  $routes;
 
     /**
      * The constructor loads SimpleMVC core configuration
@@ -28,6 +30,10 @@ class Config {
     public function __construct() {
         // Load core configuration file.
         $this->load_core_config();
+    }
+
+    public function __get($name) {
+        return $this->$name;
     }
 
     /**

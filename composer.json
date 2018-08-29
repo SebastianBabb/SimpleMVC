@@ -1,0 +1,8 @@
+{
+    "require": {
+        "squizlabs/php_codesniffer": "*"
+    },
+    "require-dev": {
+        "sstalle/php7cc": "^1.2"
+    }
+}

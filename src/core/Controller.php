@@ -1,5 +1,7 @@
 <?php
 
+namespace SimpleMVC;
+
 /**
  * Contoller is the base controller class for SimpleMVC.
  *
@@ -16,23 +18,29 @@
  * @package SimpleMVC
  * @author Sebastian Babb <sebastianbabb@gmail.com>
  * @version 0.9.1
- * @copyright (C) 2016 Sebastian Babb <sebastianbabb@gmail.com> 
+ * @copyright (C) 2016 Sebastian Babb <sebastianbabb@gmail.com>
  * @license MIT
  * @see https://www.simplemvc.xyz
  */
-class Controller {
-    protected $simpleMVC;
-    protected $load;
-    protected $controller_actions;
+class Controller
+{
+    // protected $simpleMVC;
+    protected $loader;
+    protected $controllerActions;
+    protected $displayDefaultView; // Whether or not to display default view.
+    protected $defaultView; // Default view filename.
+    protected $params; // View variables.
+    protected $view;
 
     /**
      * The constructor creates an instance of the Loader class
-     * and stores the name and actions of the class file that 
+     * and stores the name and actions of the class file that
      * instantiated it (the child).
      *
      * @access public
      */
-    public function __construct($simpleMVC) {
+    public function __construct()
+    {
         /*
          * --------------------------------------------------------------
          * Create a loader instance that the children will use to load
@@ -40,9 +48,11 @@ class Controller {
          * that called the contructor.
          * --------------------------------------------------------------
          */
-        $this->load = new Loader($this);
-        $this->controller_actions = get_class_methods($this);
-        $this->simpleMVC = $simpleMVC;
+        $this->loader = new Loader($this);
+        $this->controllerActions = get_class_methods($this);
+        $this->displayDefaultView = true;
+        // $this->defaultView =
+        $this->params = null;
     }
 
     /**
@@ -52,7 +62,15 @@ class Controller {
      * @param string @action the name of the action (method) to execute
      * @access public
      */
-    public function execute_action($action) {
+    public function executeAction($action = null)
+    {
+        /*
+         * --------------------------------------------------------------
+         * Ensure no action is treated as the index action.
+         * --------------------------------------------------------------
+         */
+        if ($action == null) $action = 'index';
+
         /*
          * --------------------------------------------------------------
          * Ensure the action exists in the controller and execute it.
@@ -60,7 +78,7 @@ class Controller {
          * an InvalidControllerActionException is thrown.
          * --------------------------------------------------------------
          */
-        if(in_array($action, $this->controller_actions)) {
+        if(in_array($action, $this->controllerActions)) {
             /*
              * --------------------------------------------------------------
              * Call action method of the instance.
@@ -72,14 +90,46 @@ class Controller {
         }
     }
 
+    public function suppressDefaultView() {
+        $this->displayDefaultView = false;
+    }
+
     /**
-     * Loads the view file.
+     * Builds the path to the view file and converts the key => value array to
+     * variables in the calling controllers symbol table.
      *
-     * @param string @file_path the path of the view file to load
+     * @param string @fileName the filename of the view to load.
+     * @param array @variables referential array of variableName  => values.
      * @access public
      */
-    public function load_view($file_path) {
-       require($file_path); 
+    public function view($fileName, $variables = null) {
+        $this->loader->view($fileName, $variables);
+    }
+
+    /**
+     * Set the varialbles that will be available in the view.
+     */
+    public function setParams($params) {
+        $this->params = $params;
+    }
+
+    /**
+     * Display the default view only if it has not been explicitly suppressed.
+     */
+    public function defaultView() {
+        if ($this->displayDefaultView) {
+            $this->loader->view($this->view, $this->params);
+        }
+    }
+
+    /**
+     * Loads the view file into the current context.
+     * Called by the loader->view function after it builds the
+     * view file path and loads the variables into the controllers
+     * symbol table.
+     */
+    public function loadView($filePath) {
+        require_once $filePath;
     }
 
     /**

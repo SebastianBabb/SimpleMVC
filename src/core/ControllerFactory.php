@@ -1,5 +1,7 @@
 <?php
 
+namespace SimpleMVC;
+
 /**
  * The ControllerFactory class instaniates controller objects.
  *
@@ -13,37 +15,39 @@
  * @package SimpleMVC
  * @author Sebastian Babb <sebastianbabb@gmail.com>
  * @version 0.9.1
- * @copyright (C) 2016 Sebastian Babb <sebastianbabb@gmail.com> 
+ * @copyright (C) 2016 Sebastian Babb <sebastianbabb@gmail.com>
  * @license MIT
  * @see https://www.simplemvc.xyz
  */
 
-class ControllerFactory {
+class ControllerFactory
+{
     /**
      * Returns an instance of the controller class specified by
      * the router instance argument.  If the controller class file
      * does not exist, an InvalidControllerException is thrown.
-     * 
-     * @param SimpleMCV $simpleMVC an instance of the SimpleMVC class which contains
-     *        Router, Config and other members. 
+     *
+     * @param $simpleMVC an instance of the SimpleMVC class which contains
+     *        Router, Config and other members.
      * @return Controller an instance of the controller class specified by the router.
      * @access public
      */
-    public static function create($simpleMVC) {
-        // Retrieve the router object.
-        $router = $simpleMVC->get_router();
-
+    public static function create($router): Controller
+    {
         /*
          * --------------------------------------------------------------
          * Ensure the controller file exists and import it.
          * --------------------------------------------------------------
          */
-        if(file_exists($router->controller_file)) {
-            require($router->controller_file);
+        if (file_exists($router->controllerFile)) {
+            require_once $router->controllerFile;
         } else {
-           throw new InvalidControllerException("Error:: No such controller {$router->controller_file}");
+            $errMsg = "Error:: No such controller {$router->controllerFile}";
+            
+            throw new InvalidControllerException($errMsg);
         }
 
-        return new $router->controller($simpleMVC);
+        // Create and return the instance of the controller class.
+        return new $router->controllerClass();
     }
 }

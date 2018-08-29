@@ -1,5 +1,7 @@
 <?php
 
+namespace SimpleMVC;
+
 /**
  * SimpleMVCException is the base exception class for SimpleMVC.
  *
@@ -10,7 +12,7 @@
  * @license MIT
  * @see https://www.simplemvc.xyz
  */
-class SimpleMVCException extends Exception {
+class SimpleMVCException extends \Exception {
     function __construct($message, $code = 0, Exception $previous = null) {
         parent::__construct($message, $code, $previous);
     }

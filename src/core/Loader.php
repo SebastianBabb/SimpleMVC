@@ -1,5 +1,7 @@
 <?php
 
+namespace SimpleMVC;
+
 /**
  * The Loader class loads application level file (models, views, ect).
  *
@@ -16,7 +18,7 @@
 class Loader {
     private $view_dir;
     private $model_dir;
-    private $controller_instance;
+    private $ci;
 
     /**
      * The constructor builds the directory paths for views, models, ect..
@@ -27,7 +29,7 @@ class Loader {
     public function __construct($ci) {
         $this->view_dir = "app/" . VIEW_DIR . "/";
         $this->model_dir = "app/" . MODEL_DIR . "/";
-        $this->controller_instance = $ci;
+        $this->ci = $ci; // Controller instances.
     }
 
     /**
@@ -77,13 +79,16 @@ class Loader {
              * otherwise, throw an error.
              * --------------------------------------------------------------
              */
-            if(!is_null($variables) && is_array($variables) && !is_int(array_keys($variables)[0])) {
+            if(is_array($variables) && !is_int(array_keys($variables)[0])) {
                 $this->load_variables($variables); // Throw incorrect data format excpetion in not array of key value pairs.
             } else {
-                throw new InvalidVariablesException("Error:: Invalid variables argument for view.");
+                // Null variables is fine.  Dont throw an error.
+                if (!is_null($variables)) {
+                    throw new InvalidVariablesException("Error:: Invalid variables argument for view.");
+                }
             }
 
-            $this->controller_instance->load_view($view_file_path); 
+            $this->ci->loadView($view_file_path);
         } else {
             throw new InvalidViewException("Error:: No such View {$view_file_path}");
         }
@@ -124,7 +129,7 @@ class Loader {
          * --------------------------------------------------------------
          */
         if(file_exists($view_file_path)) {
-            return $this->controller_instance->load_view_source($view_file_path);
+            return $this->ci->load_view_source($view_file_path);
         } else {
             throw new InvalidViewException("Error:: No such View {$view_file_path}");
         }
@@ -193,8 +198,8 @@ class Loader {
      * @param referential array $variables dictionary of variable names to values
      */
     private function load_variables($variables) {
-        foreach($variables as $name=>$value) {
-            $this->controller_instance->$name = $value;
+        foreach ($variables as $name=>$value) {
+            $this->ci->$name = $value;
         }
     }
 }
